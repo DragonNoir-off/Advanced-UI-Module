@@ -15,9 +15,3 @@ end
 function love.draw()
 
 end
-
-local function func()
-
-end
-
-local function
