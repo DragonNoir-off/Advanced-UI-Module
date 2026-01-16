@@ -1,3 +1,3 @@
 @ECHO
 
-start "" "F:\Lua_IDE\LOVE\lovec.exe" .
+start "" "E:\Lua_IDE\LOVE\lovec.exe" .
