@@ -1,4 +1,3 @@
-local love = require("love")
 
 --[[ MODULES ]]
 local UI = require("src.Modules.UI")
@@ -13,5 +12,5 @@ function love.update(dt)
 end
 
 function love.draw()
-
+    UI.draw()
 end
