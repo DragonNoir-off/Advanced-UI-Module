@@ -6,4 +6,8 @@ function module.min_max(value, min, max)
     else return value end
 end
 
+function module.map(value, min, max, new_min, new_max)
+    return 0
+end
+
 return module

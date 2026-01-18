@@ -20,7 +20,9 @@ function module.new3(red,green,blue)
     return module.new4(red,green,blue,255)
 end
 
-local ColorTable = {}
+local ColorTable = {
+    white = module.new4(1,1,1,1)
+}
 
 function module.fromPalette(color_name)
     return (ColorTable[color_name] or module.new4(1,1,1,1))

@@ -3,6 +3,8 @@ local utf8 = require("utf8")
 
 --[[ MODULES ]]
 local UI = require("src.Modules.UI")
+local Assets = require("src.Loader.AssetsLoader")
+local Task = require("src.Modules.Task")
 
 --[[ DATA ]]
 local PreLoadUserInterface = require("src.UI_DATA.PreLoadUserInterface")
@@ -23,6 +25,9 @@ function love.load()
 
     -- KEYBOARD CONFIGURATION
     love.keyboard.setKeyRepeat(true)
+
+    -- LOAD ALL ASSETS
+    Assets.load_assets()
 
     -- UI CONFIGURATION
     PreLoadUserInterface.MainScene()

@@ -3,6 +3,7 @@ module.__index = module
 
 -- Modules
 local Color = require("src.Modules.Color")
+local Assets = require("src.Loader.AssetsLoader")
 
 local workspace = {}
 function module.returnWorkspace() return workspace end -- debug function
@@ -41,7 +42,7 @@ function module.new(data)
         -- circle
 
         attribut.radius = return_default(data_attribut.radius, 0)
-        attribut.color = return_default(data_attribut.color, Color.fromRGB(255,255,255))
+        attribut.color = return_default(data_attribut.color, Color.fromPalette("white"))
         attribut.mode = return_default(data_attribut.mode, "fill")
 
     elseif data.ui_type == "rectangle" then
@@ -54,10 +55,20 @@ function module.new(data)
         end -- modification can be added later but right now it does the work ( .scale / .offset || .x / .y )
         
         attribut.mode = return_default(data_attribut.mode, "fill")
-        attribut.color = return_default(data_attribut.color, Color.fromRGB(255,255,255))
+        attribut.color = return_default(data_attribut.color, Color.fromPalette("white"))
 
     elseif data.ui_type == "image" then
         -- image
+
+        attribut.size = {x=0,y=0}
+        if data_attribut.size ~= nil then
+            if data_attribut.size[1] ~= nil then attribut.size.x = data_attribut.size[1] end
+            if data_attribut.size[2] ~= nil then attribut.size.y = data_attribut.size[2] end
+        end
+
+        attribut.color = return_default(data_attribut.color, Color.fromPalette("white"))
+        attribut.rotation = return_default(data_attribut.rotation, 0)
+        attribut.image = Assets.Get(return_default(data_attribut.image, "lua_icon.png"))
 
     elseif data.ui_type == "sprite-sheet" then
         -- sprite-sheet
@@ -121,11 +132,20 @@ function module:removeChild(child)
 end
 
 function module:changeParent(new_parent)
-    --print("change parent of ",self.name," to ",new_parent.name or new_parent)
+    
+    local function get_position(childs)
+        for i,child in ipairs(childs) do
+            if child.zindex > self.zindex then
+                return i
+            end
+        end
+        return (#childs)+1
+    end
+
     if type(new_parent) == "string" then
         if new_parent == "workspace" then
             self.parent = "workspace"
-            table.insert(workspace, self)
+            table.insert(workspace, get_position(workspace), self)
         else
             new_parent = module.returnObjectFromPath(new_parent)
             if new_parent == nil then
@@ -142,7 +162,8 @@ function module:changeParent(new_parent)
             print("[[ LOG ]] -> no change have been done to the previous parent")
         end
         self.parent = new_parent
-        table.insert(new_parent.child, self)
+
+        table.insert(new_parent.child, get_position(new_parent.child), self)
     else
         print("[[ ERROR | UI.lua , module:changeParent() ]] -- the parent element have to be a UI class Object or a Path to a valide UI class Object")
         print("[[ LOG ]] -> type of the provide parent : "..type(new_parent))
@@ -163,7 +184,6 @@ function module:returnPath()
 end
 
 function module:draw()
-    print(self.name)
     local attribut = self.attribut
     if self.ui_type == "scene" then
         -- do nothing
@@ -187,6 +207,24 @@ function module:draw()
 
         love.graphics.setColor(unpack(color))
         love.graphics.rectangle(mode, pos_x, pos_y, size_x, size_y)
+
+    elseif self.ui_type == "image" then
+
+        local pos_x = self.position.x
+        local pos_y = self.position.y
+        local image = attribut.image
+        local size_x = attribut.size.x
+        local size_y = attribut.size.y
+        local rotation = attribut.rotation
+        local color = attribut.color
+
+        local ratio_x = ( size_x / image:getWidth() )
+        local ratio_y = ( size_y / image:getHeight() )
+        if size_x == 0 then ratio_x = 1 end
+        if size_y == 0 then ratio_y = 1 end
+
+        love.graphics.setColor(unpack(color))
+        love.graphics.draw(image, pos_x, pos_y, rotation, ratio_x, ratio_y)
     end
 end
 
@@ -194,13 +232,12 @@ end
 function module.draw_ui()
     
     local function loop_children(ui)
-        ui:draw()
-        for i,v in pairs(ui.child) do
-            loop_children(v)
+        if ui.visible then ui:draw() end
+        for i,v in ipairs(ui.child) do
+            if ui.child_visible then loop_children(v) end
         end
     end
 
-    print("-----------------")
     for i,v in pairs(workspace) do
         loop_children(v)
     end
