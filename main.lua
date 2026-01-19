@@ -17,16 +17,19 @@ local SCREEN_WIDTH, SCREEN_HEIGHT = love.window.getDesktopDimensions()
 --[[ VARIABLES ]]
 
 function love.load()
+    -- LOAD ALL ASSETS
+    Assets.load_assets()
+
     -- LOAD WINDOW CONFIGURATION
     love.window.setMode(WINDOW_WIDTH,WINDOW_HEIGHT, {resizable=true, fullscreen=false, fullscreentype = "desktop"})
     love.window.setPosition((SCREEN_WIDTH - WINDOW_WIDTH)/2,(SCREEN_HEIGHT - WINDOW_HEIGHT)/2,1) -- place the windows in the center of the screen
     love.window.setTitle("Advanced UI Module")
+    love.window.setIcon(love.image.newImageData("assets/Deepwoken_icon.png"))
 
     -- KEYBOARD CONFIGURATION
     love.keyboard.setKeyRepeat(true)
 
-    -- LOAD ALL ASSETS
-    Assets.load_assets()
+    
 
     -- UI CONFIGURATION
     PreLoadUserInterface.MainScene()
@@ -36,7 +39,8 @@ end
 
 function love.update(dt)
     task.UpdateTask(dt)
-    image1.attribut.rotation = image1.attribut.rotation + math.rad( dt * 360 )
+    image1:changeSize({image1.attribut.size.x + ( 100 * dt ),image1.attribut.size.y})
+    image1.attribut.rotation = image1.attribut.rotation + math.rad( dt * 20 )
 end
 
 function love.keypressed(key, _)

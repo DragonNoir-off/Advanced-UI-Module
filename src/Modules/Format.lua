@@ -6,8 +6,18 @@ function module.min_max(value, min, max)
     else return value end
 end
 
-function module.map(value, min, max, new_min, new_max)
-    return 0
+function module.digit(number, digit, floor_or_ceil)
+    local counter = 0
+    while number > ( 10 * math.pow(10,digit)) do
+        number = number / 10
+        counter = counter + 1
+    end
+    if floor_or_ceil == nil or floor_or_ceil == true then
+        number = math.floor(number)
+    else
+        number = math.ceil(number)
+    end
+    return ( number )
 end
 
 return module

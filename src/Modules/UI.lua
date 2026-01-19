@@ -24,9 +24,9 @@ function module.new(data)
     self.child_visible = return_default(data.child_visible, true)
 
     -- Commun Attribut Function
-    print(self.name)
+    
     -- set size of the element base on provide data
-    local function SetSize(_size, data)
+    function self.SetSize(_size, data)
         if data ~= nil then
             if data[1] ~= nil then -- if value X exist
                 _size.x = data[1] -- set to value X
@@ -76,30 +76,32 @@ function module.new(data)
     elseif data.ui_type == "rectangle" then
         -- rectangle
 
-        attribut.size = SetSize({x=0,y=0},data_attribut.size)
+        attribut.size = self.SetSize({x=0,y=0},data_attribut.size)
         -- modification can be added later but right now it does the work ( .scale / .offset || .x / .y )
         
         attribut.mode = return_default(data_attribut.mode, "fill")
         attribut.color = return_default(data_attribut.color, Color.fromPalette("white"))
         
+        self.pre_render_anchor_point = data.anchor_point
         self.anchor_point = self.CalculateAnchorPoint(data.anchor_point, attribut.size.x, attribut.size.y)
 
     elseif data.ui_type == "image" then
         -- image
 
-        attribut.size = SetSize({x=0,y=0},data_attribut.size)
+        attribut.size = self.SetSize({x=0,y=0},data_attribut.size)
 
         attribut.color = return_default(data_attribut.color, Color.fromPalette("white"))
         attribut.rotation = return_default(data_attribut.rotation, 0)
         attribut.image = Assets.Get(return_default(data_attribut.image, "lua_icon.png"))
 
+        self.pre_render_anchor_point = data.anchor_point
         self.anchor_point = self.CalculateAnchorPoint(data.anchor_point, attribut.image:getWidth(), attribut.image:getHeight())
 
     elseif data.ui_type == "text" then
         attribut.text = return_default(data_attribut.text, "")
         attribut.rotation = return_default(data_attribut.rotation, 0)
         
-        attribut.size = SetSize({x=1,y=1},data_attribut.size)
+        attribut.size = self.SetSize({x=1,y=1},data_attribut.size)
 
     end
     self.attribut = attribut
@@ -128,17 +130,17 @@ end
 -- CLASS FUNCTION
 
 function module:changeSize(new_size)
-
+    self.attribut.size = self.SetSize(self.attribut.size, new_size)
+    self:changeAnchorPoint(self.pre_render_anchor_point)
 end
 
 function module:changeAnchorPoint(new_anchor_point)
     local ui_type = self.ui_type
     if ui_type == "image" then
-        self.anchor_point = self.CalculateAnchorPoint(self.anchor_point, self.image:getWidth(), self.image:getHeight())
+        self.anchor_point = self.CalculateAnchorPoint(new_anchor_point, self.attribut.image:getWidth(), self.attribut.image:getHeight())
     elseif ui_type == "rectangle" then
-        self.anchor_point = self.CalculateAnchorPoint(self.anchor_point, self.size.x, self.size.y)
+        self.anchor_point = self.CalculateAnchorPoint(new_anchor_point, self.attribut.size.x, self.attribut.size.y)
     end
-    
 end
 
 function module:addChild(child)
@@ -272,13 +274,6 @@ function module:draw()
 
         local ratio_x = ( size_x / image:getWidth() )
         local ratio_y = ( size_y / image:getHeight() )
-
-        if self.name == "image3" then
-            print("--------------")
-            print(image:getWidth() * ratio_x, image:getHeight() * ratio_y)
-            print(anchor_offset_x, anchor_offset_y)
-            print(ratio_x, ratio_y)
-        end
 
         love.graphics.setColor(unpack(color))
         love.graphics.draw(image, pos_x, pos_y, rotation, ratio_x, ratio_y, anchor_offset_x, anchor_offset_y)

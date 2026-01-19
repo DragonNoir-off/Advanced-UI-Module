@@ -4,11 +4,11 @@ local active_task = {}
 
 function module.UpdateTask(delta_time)
     for i,task in pairs(active_task) do
-        print(task.func)
         local status = coroutine.status(task.func)
         if status == "suspended" then
             task.delay = task.delay - delta_time
             if task.delay <= 0 then
+                print("resume")
                 coroutine.resume(task.func)
             end
         elseif status == "dead" then
