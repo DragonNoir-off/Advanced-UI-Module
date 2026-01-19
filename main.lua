@@ -4,7 +4,7 @@ local utf8 = require("utf8")
 --[[ MODULES ]]
 local UI = require("src.Modules.UI")
 local Assets = require("src.Loader.AssetsLoader")
-local Task = require("src.Modules.Task")
+local task = require("src.Modules.Task")
 
 --[[ DATA ]]
 local PreLoadUserInterface = require("src.UI_DATA.PreLoadUserInterface")
@@ -15,7 +15,6 @@ local WINDOW_HEIGHT = 540
 local SCREEN_WIDTH, SCREEN_HEIGHT = love.window.getDesktopDimensions()
 
 --[[ VARIABLES ]]
-local timestamp = 0
 
 function love.load()
     -- LOAD WINDOW CONFIGURATION
@@ -31,10 +30,17 @@ function love.load()
 
     -- UI CONFIGURATION
     PreLoadUserInterface.MainScene()
+
+    image1 = UI.returnObjectFromPath("workspace/image3")
 end
 
 function love.update(dt)
-    timestamp = timestamp + dt
+    task.UpdateTask(dt)
+    image1.attribut.rotation = image1.attribut.rotation + math.rad( dt * 360 )
+end
+
+function love.keypressed(key, _)
+    
 end
 
 function love.draw()

@@ -16,7 +16,7 @@ return {
             name = "rectangle_2",
             parent = rectangle_1,
             ui_type = "rectangle",
-            position = {200,100},
+            position = {300,100},
             attribut = {
                 mode = "line",
                 size = {75,75},
@@ -30,7 +30,8 @@ return {
             attribut = {
                 radius = 50,
                 color = Color.fromRGB(0,255,255)
-            }
+            },
+            zindex = 2,
         })
         local image1 = UI.new({
             name = "image1",
@@ -41,6 +42,42 @@ return {
                 color = Color.fromPalette("white"),
                 size = {100,100}
             }
+        })
+
+        local image3 = UI.new({
+            name = "image3",
+            ui_type = "image",
+            position = {220,220},
+            anchor_point = {x=0.5,y=0.5},
+            zindex = 2,
+            attribut = {
+                image = "Deepwoken_icon.png",
+                color = Color.fromPalette("blue"),
+                size = {100,100}
+            }
+        })
+        local image10 = UI.new({
+            name = "image_test",
+            ui_type = "image",
+            position = {220,220},
+            anchor_point = {x=0.5,y=0.5},
+            attribut = {
+                image = "Deepwoken_icon.png",
+                color = Color.fromPalette("white"),
+                size = {100,100}
+            }
+        })
+
+        local image2 = UI.new({
+            name = "image2",
+            ui_type = "image",
+            position = {700,200},
+            attribut = {
+                image = "lua_icon.png",
+                color = Color.fromPalette("white"),
+                size = {100,100}
+            },
+            zindex = 1
         })
 
         local zindex_1 = UI.new({
@@ -55,7 +92,7 @@ return {
                 color = Color.fromRGB(0,200,0)
             }
         })
-        local zindex_1 = UI.new({
+        local zindex_2 = UI.new({
             name = "rect2",
             parent = "workspace",
             ui_type = "rectangle",
@@ -65,6 +102,28 @@ return {
                 mode = "fill",
                 size = {75,75},
                 color = Color.fromRGB(200,0,0)
+            }
+        })
+
+        local text1 = UI.new({
+            name = "text1",
+            parent = "workspace",
+            ui_type = "text",
+            position = {400,20},
+            zindex = 3,
+            attribut = {
+                text = "voila un text bien long"
+            }
+        })
+        local text2 = UI.new({
+            name = "text2",
+            parent = "workspace",
+            ui_type = "text",
+            position = {400,40},
+            zindex = 3,
+            attribut = {
+                text = "voila un text encore bien plus long",
+                rotation = math.rad(10)
             }
         })
     end

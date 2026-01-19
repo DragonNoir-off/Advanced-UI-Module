@@ -4,10 +4,11 @@ local active_task = {}
 
 function module.UpdateTask(delta_time)
     for i,task in pairs(active_task) do
+        print(task.func)
         local status = coroutine.status(task.func)
         if status == "suspended" then
-            task.timer = task.timer - delta_time
-            if task.timer <= 0 then
+            task.delay = task.delay - delta_time
+            if task.delay <= 0 then
                 coroutine.resume(task.func)
             end
         elseif status == "dead" then
@@ -26,11 +27,12 @@ end
 
 function module.spawn(func, callback)
     local task = {
+        delay = 0,
         func = create_coroutine(func),
         callback = callback
     }
-    table.insert(active_task, #active_task+1, task)
-    coroutine.resume(active_task[#active_task].func)
+    table.insert(active_task, task)
+    coroutine.resume(task.func)
 end
 
 function module.defer(func, callback)
@@ -40,7 +42,7 @@ end
 function module.delay(delay, func, callback)
     local task = {
         delay = delay,
-        func = func,
+        func = create_coroutine(func),
         callback = callback
     }
     table.insert(active_task, task)

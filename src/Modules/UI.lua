@@ -22,9 +22,37 @@ function module.new(data)
     self.ui_type = return_default(data.ui_type, "scene")
     self.visible = return_default(data.visible, true)
     self.child_visible = return_default(data.child_visible, true)
-    
+
+    -- Commun Attribut Function
+    print(self.name)
+    -- set size of the element base on provide data
+    local function SetSize(_size, data)
+        if data ~= nil then
+            if data[1] ~= nil then -- if value X exist
+                _size.x = data[1] -- set to value X
+                if data[2] ~= nil then -- if value Y exist
+                    _size.y = data[2] -- set to value Y
+                else
+                    _size.y = data[1] -- set to value X ( Y == nil )
+                end
+            end
+        end
+        return _size
+    end
+
+    function self.CalculateAnchorPoint(anchor_point, size_x, size_y)
+        -- calculate anchor point relative to the element size
+        anchor_point = return_default(anchor_point, {x=0,y=0})
+        local new_anchor_point = {
+            x = size_x * anchor_point.x,
+            y = size_y * anchor_point.y
+        }
+        return new_anchor_point
+    end
+
     -- Specific attributs
     
+    -- set the position of the element
     local position = {x=0,y=0}
     if data.position ~= nil then
         if data.position[1] ~= nil then position.x = data.position[1] end
@@ -48,30 +76,30 @@ function module.new(data)
     elseif data.ui_type == "rectangle" then
         -- rectangle
 
-        attribut.size = {x=0,y=0}
-        if data_attribut.size ~= nil then
-            if data_attribut.size[1] ~= nil then attribut.size.x = data_attribut.size[1] end
-            if data_attribut.size[2] ~= nil then attribut.size.y = data_attribut.size[2] end
-        end -- modification can be added later but right now it does the work ( .scale / .offset || .x / .y )
+        attribut.size = SetSize({x=0,y=0},data_attribut.size)
+        -- modification can be added later but right now it does the work ( .scale / .offset || .x / .y )
         
         attribut.mode = return_default(data_attribut.mode, "fill")
         attribut.color = return_default(data_attribut.color, Color.fromPalette("white"))
+        
+        self.anchor_point = self.CalculateAnchorPoint(data.anchor_point, attribut.size.x, attribut.size.y)
 
     elseif data.ui_type == "image" then
         -- image
 
-        attribut.size = {x=0,y=0}
-        if data_attribut.size ~= nil then
-            if data_attribut.size[1] ~= nil then attribut.size.x = data_attribut.size[1] end
-            if data_attribut.size[2] ~= nil then attribut.size.y = data_attribut.size[2] end
-        end
+        attribut.size = SetSize({x=0,y=0},data_attribut.size)
 
         attribut.color = return_default(data_attribut.color, Color.fromPalette("white"))
         attribut.rotation = return_default(data_attribut.rotation, 0)
         attribut.image = Assets.Get(return_default(data_attribut.image, "lua_icon.png"))
 
-    elseif data.ui_type == "sprite-sheet" then
-        -- sprite-sheet
+        self.anchor_point = self.CalculateAnchorPoint(data.anchor_point, attribut.image:getWidth(), attribut.image:getHeight())
+
+    elseif data.ui_type == "text" then
+        attribut.text = return_default(data_attribut.text, "")
+        attribut.rotation = return_default(data_attribut.rotation, 0)
+        
+        attribut.size = SetSize({x=1,y=1},data_attribut.size)
 
     end
     self.attribut = attribut
@@ -82,9 +110,15 @@ function module.new(data)
 
     -- Privates functions
 
-    self.returnChildPosition = function(child)
-        for i,v in pairs(self.child) do
-            if v == child then return i end
+    function self.returnChildPosition(child)
+        if type(child) == "string" then
+            for i,v in pairs(self.child) do
+                if v.name == child then return i end
+            end
+        else
+            for i,v in pairs(self.child) do
+                if v == child then return i end
+            end
         end
     end
 
@@ -92,6 +126,20 @@ function module.new(data)
 end
 
 -- CLASS FUNCTION
+
+function module:changeSize(new_size)
+
+end
+
+function module:changeAnchorPoint(new_anchor_point)
+    local ui_type = self.ui_type
+    if ui_type == "image" then
+        self.anchor_point = self.CalculateAnchorPoint(self.anchor_point, self.image:getWidth(), self.image:getHeight())
+    elseif ui_type == "rectangle" then
+        self.anchor_point = self.CalculateAnchorPoint(self.anchor_point, self.size.x, self.size.y)
+    end
+    
+end
 
 function module:addChild(child)
     local IsChildValid = true
@@ -185,50 +233,83 @@ end
 
 function module:draw()
     local attribut = self.attribut
-    if self.ui_type == "scene" then
+    local ui_type = self.ui_type
+
+    local function get_position() return self.position.x, self.position.y end
+    local function get_rotation() return attribut.rotation end
+    local function get_color() return attribut.color end
+    local function get_size() return attribut.size.x, attribut.size.y end
+    local function get_anchor_offset() return self.anchor_point.x, self.anchor_point.y end
+
+    if ui_type == "scene" then
         -- do nothing
     elseif self.ui_type == "circle" then
         local mode = attribut.mode
-        local x = self.position.x
-        local y = self.position.y
+        local x, y = get_position()
         local radius = attribut.radius
-        local color = attribut.color
+        local color = get_color()
 
         love.graphics.setColor(unpack(color))
         love.graphics.circle(mode, x, y, radius)
 
-    elseif self.ui_type == "rectangle" then
+    elseif ui_type == "rectangle" then
         local mode = attribut.mode
-        local pos_x = self.position.x
-        local pos_y = self.position.y
-        local size_x = attribut.size.x
-        local size_y = attribut.size.y
-        local color = attribut.color
+        local pos_x, pos_y = get_position()
+        local size_x, size_y = get_size()
+        local color = get_color()
+        local anchor_offset_x, anchor_offset_y = get_anchor_offset()
 
         love.graphics.setColor(unpack(color))
-        love.graphics.rectangle(mode, pos_x, pos_y, size_x, size_y)
+        love.graphics.rectangle(mode, pos_x, pos_y, size_x, size_y, anchor_offset_x, anchor_offset_y)
 
-    elseif self.ui_type == "image" then
-
-        local pos_x = self.position.x
-        local pos_y = self.position.y
+    elseif ui_type == "image" then
+        local pos_x, pos_y = get_position()
         local image = attribut.image
-        local size_x = attribut.size.x
-        local size_y = attribut.size.y
-        local rotation = attribut.rotation
-        local color = attribut.color
+        local size_x, size_y = get_size()
+        local rotation = get_rotation()
+        local color = get_color()
+        local anchor_offset_x, anchor_offset_y = get_anchor_offset()
 
         local ratio_x = ( size_x / image:getWidth() )
         local ratio_y = ( size_y / image:getHeight() )
-        if size_x == 0 then ratio_x = 1 end
-        if size_y == 0 then ratio_y = 1 end
+
+        if self.name == "image3" then
+            print("--------------")
+            print(image:getWidth() * ratio_x, image:getHeight() * ratio_y)
+            print(anchor_offset_x, anchor_offset_y)
+            print(ratio_x, ratio_y)
+        end
 
         love.graphics.setColor(unpack(color))
-        love.graphics.draw(image, pos_x, pos_y, rotation, ratio_x, ratio_y)
+        love.graphics.draw(image, pos_x, pos_y, rotation, ratio_x, ratio_y, anchor_offset_x, anchor_offset_y)
+
+    elseif ui_type == "text" then
+        local text = attribut.text
+        local pos_x, pos_y = get_position()
+        local rotation = get_rotation()
+        local font_size_x, font_size_y = get_size()
+
+        love.graphics.print(text, pos_x, pos_y, rotation, font_size_x, font_size_y)
     end
 end
 
 -- MODULE FUNCTION
+function module.returnChildPosition(self, child)
+    if self == workspace then
+        if type(child) == "string" then
+            for i,v in pairs(workspace) do
+                if v.name == child then return i end
+            end
+        else
+            for i,v in pairs(workspace) do
+                if v == child then return i end
+            end
+        end
+    else
+        return self.returnChildPosition(child)
+    end
+end
+
 function module.draw_ui()
     
     local function loop_children(ui)
@@ -250,24 +331,30 @@ end
 
 function module.returnObjectFromPath(path)
     if type(path) ~= "string" then print("[[ ERROR | UI.lua , module.returnObjectFromPath() ]] -- the path provide isnt a string") return nil end
-    if string.sub(path, 1, 11) ~= "workspace" then print("[[ ERROR | UI.lua , module.returnObjectFromPath() ]] -- the path provide isnt starting in the workspace") return nil end
+    if string.sub(path, 1, 9) ~= "workspace" then print("[[ ERROR | UI.lua , module.returnObjectFromPath() ]] -- the path provide isnt starting in the workspace") return nil end
     
     -- remove workspace/ from string ( default required value in path )
     local object = workspace
     path = string.gsub(path, "workspace/", "")
     path = path.."/" -- require to detect the end of the path
-    
+
     -- collect all "/" position for easier split
     local slash_table = {}
     for i=1, string.len(path), 1 do
         if string.sub(path,i,i) == "/" then table.insert(slash_table, i) end
     end
 
+    local PathIsValide = true
     for i,v in pairs(slash_table) do
-        --print(i,v)
+        local next_object = object[module.returnChildPosition(workspace, string.sub(path,(slash_table[i-1] or 0)+1,v-1))]
+        if next_object ~= nil and PathIsValide then
+            object = next_object
+        else
+            PathIsValide = false -- stop the for loop and return the lastest object
+        end
     end
 
-    return object
+    return object, PathIsValide
 end
 
 return module
