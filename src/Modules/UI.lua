@@ -6,7 +6,6 @@ local Color = require("src.Modules.Color")
 local Assets = require("src.Loader.AssetsLoader")
 
 local workspace = {}
-function module.returnWorkspace() return workspace end -- debug function
 
 function module.new(data)
     if data == nil then data = {} end
@@ -18,7 +17,7 @@ function module.new(data)
 
     self.name = return_default(data.name, "_")
     self.zindex = return_default(data.zindex, 1)
-    self:changeParent(return_default(data.parent, "workspace"))
+    self.parent = return_default(data.parent, "workspace")
     self.ui_type = return_default(data.ui_type, "scene")
     self.visible = return_default(data.visible, true)
     self.child_visible = return_default(data.child_visible, true)
@@ -92,7 +91,7 @@ function module.new(data)
 
         attribut.color = return_default(data_attribut.color, Color.fromPalette("white"))
         attribut.rotation = return_default(data_attribut.rotation, 0)
-        attribut.image = Assets.Get(return_default(data_attribut.image, "lua_icon.png"))
+        attribut.image = return_default(data_attribut.image, Assets.Get("lua_icon.png"))
 
         self.pre_render_anchor_point = data.anchor_point
         self.anchor_point = self.CalculateAnchorPoint(data.anchor_point, attribut.image:getWidth(), attribut.image:getHeight())
@@ -103,11 +102,27 @@ function module.new(data)
         
         attribut.size = self.SetSize({x=1,y=1},data_attribut.size)
 
+    elseif data.ui_type == "sprite-sheet" then
+
+        attribut.size = self.SetSize({x=0,y=0},data_attribut.size)
+
+        attribut.color = return_default(data_attribut.color, Color.fromPalette("white"))
+        attribut.rotation = return_default(data_attribut.rotation, 0)
+        attribut.image = return_default(data_attribut.image, Assets.Get("assets/Fire Effect and Bullet 16x16.png"))
+
+        attribut.sprite_size = self.SetSize({x=0,y=0},data_attribut.sprite_size)
+
+        self.pre_render_anchor_point = data.anchor_point
+        self.anchor_point = self.CalculateAnchorPoint(data.anchor_point, attribut.image:getWidth(), attribut.image:getHeight())
+
+        attribut.sprite_quad_id = return_default(data_attribut.sprite_quad_id,1)
+        attribut.quad = data_attribut.quad
     end
     self.attribut = attribut
 
-    -- Default attributs
+    -- Child and Parent structure
 
+    self:changeParent(self.parent)
     self.child = {}
 
     -- Privates functions
@@ -140,6 +155,16 @@ function module:changeAnchorPoint(new_anchor_point)
         self.anchor_point = self.CalculateAnchorPoint(new_anchor_point, self.attribut.image:getWidth(), self.attribut.image:getHeight())
     elseif ui_type == "rectangle" then
         self.anchor_point = self.CalculateAnchorPoint(new_anchor_point, self.attribut.size.x, self.attribut.size.y)
+    end
+end
+
+function module:changeImage(new_image)
+    if self.ui_type ~= "image" then return end
+    if type(new_image) == "string" then
+        local image = Assets.Get(new_image)
+        if image ~= nil then self.attribut.image = image end
+    else
+
     end
 end
 
@@ -183,7 +208,7 @@ end
 
 function module:changeParent(new_parent)
     
-    local function get_position(childs)
+    local function get_zindex_position(childs)
         for i,child in ipairs(childs) do
             if child.zindex > self.zindex then
                 return i
@@ -195,7 +220,7 @@ function module:changeParent(new_parent)
     if type(new_parent) == "string" then
         if new_parent == "workspace" then
             self.parent = "workspace"
-            table.insert(workspace, get_position(workspace), self)
+            table.insert(workspace, get_zindex_position(workspace), self)
         else
             new_parent = module.returnObjectFromPath(new_parent)
             if new_parent == nil then
@@ -213,7 +238,7 @@ function module:changeParent(new_parent)
         end
         self.parent = new_parent
 
-        table.insert(new_parent.child, get_position(new_parent.child), self)
+        table.insert(new_parent.child, get_zindex_position(new_parent.child), self)
     else
         print("[[ ERROR | UI.lua , module:changeParent() ]] -- the parent element have to be a UI class Object or a Path to a valide UI class Object")
         print("[[ LOG ]] -> type of the provide parent : "..type(new_parent))
@@ -221,13 +246,15 @@ function module:changeParent(new_parent)
 end
 
 function module:returnPath()
-    local path = ""
+    local path = self.name
     local parent = self.parent
+
+    if parent == "workspace" then return "workspace/"..path end
 
     -- loop until workspace to re-creat the path
     repeat
         path = parent.name.."/"..path
-        parent = self.parent
+        parent = parent.parent
     until parent == "workspace"
 
     return "workspace/"..path
@@ -285,6 +312,31 @@ function module:draw()
         local font_size_x, font_size_y = get_size()
 
         love.graphics.print(text, pos_x, pos_y, rotation, font_size_x, font_size_y)
+
+    elseif ui_type == "sprite-sheet" then
+        local image = attribut.image
+        local size_x, size_y = get_size()
+        local sprite_size_x, sprite_size_y = attribut.sprite_size.x, attribut.sprite_size.y
+        local pos_x, pos_y = get_position()
+        local rotation = get_rotation()
+        local color = get_color()
+        local anchor_offset_x, anchor_offset_y = get_anchor_offset()
+        local quad = attribut.quad[attribut.sprite_quad_id]
+
+        if quad == nil then
+            print("[[ ERROR | UI.lua , module:draw() ]] -- the provide quad doesnt exist")
+            print("[[ LOG ]] -> sprite position : "..attribut.sprite_quad_id.." , sprite name : "..self.name)
+            return
+        end -- dont draw if quad doesnt exist
+
+        local ratio_x = ( size_x / sprite_size_x )
+        local ratio_y = ( size_y / sprite_size_y)
+
+        print(image, quad, pos_x, pos_y, rotation, ratio_x, ratio_y, anchor_offset_x, anchor_offset_y)
+
+        love.graphics.setColor(unpack(color))
+        love.graphics.draw(image, quad, pos_x, pos_y, rotation, ratio_x, ratio_y, anchor_offset_x, anchor_offset_y)
+        
     end
 end
 
@@ -350,6 +402,30 @@ function module.returnObjectFromPath(path)
     end
 
     return object, PathIsValide
+end
+
+--  DEBUG FUNCTION
+
+-- return entire workpace in table type
+function module.debug__returnWorkspace() return workspace end
+
+-- print in terminal the entire workspace architecture
+function module.debug__showAll()
+    local function indent_string(str, number_indent)
+        for i=1, number_indent, 1 do
+            str = "\t"..str
+        end
+        return str
+    end
+
+    local function loop_instance(childs, depths)
+        for i,v in ipairs(childs) do
+            print(v:returnPath()) --"depths:"..depths, "childs:"..(#v.child),
+            loop_instance(v.child, depths+1)
+        end
+    end
+
+    loop_instance(workspace, 0)
 end
 
 return module

@@ -1,8 +1,27 @@
 local UI = require("src.Modules.UI")
 local Color = require("src.Modules.Color")
+local Assets = require("src.Loader.AssetsLoader")
 
 return {
     MainScene = function()
+        local fire_slash = UI.new({
+            name = "fire_slash",
+            ui_type = "sprite-sheet",
+            position = {10,10},
+            attribut = {
+                image = Assets.Get("Fire Effect and Bullet 16x16.png"),
+                size = {64,64},
+                sprite_size = {16,16},
+                sprite_quad_id = 1,
+                quad = {
+                    love.graphics.newQuad(384,33,16,16,576,208),
+                    love.graphics.newQuad(400,33,16,16,576,208),
+                    love.graphics.newQuad(416,33,16,16,576,208),
+                    love.graphics.newQuad(432,33,16,16,576,208)
+                }
+            }
+        })
+        --[[
         local rectangle_1 = UI.new({
             name = "rectangle_1",
             ui_type = "rectangle",
@@ -60,13 +79,26 @@ return {
             name = "image_test",
             ui_type = "image",
             position = {220,220},
-            anchor_point = {x=0.5,y=0.5},
+            anchor_point = {x=0,y=0},
             attribut = {
                 image = "Deepwoken_icon.png",
                 color = Color.fromPalette("white"),
                 size = {100,100}
             }
         })
+
+        local image11 = UI.new({
+            name = "image11",
+            ui_type = "image",
+            position = {350,220},
+            anchor_point = {x=0,y=0},
+            attribut = {
+                image = "Deepwoken_icon.png",
+                color = Color.fromPalette("white"),
+                size = {100,100}
+            }
+        })
+
 
         local image2 = UI.new({
             name = "image2",
@@ -126,5 +158,6 @@ return {
                 rotation = math.rad(10)
             }
         })
+        ]]
     end
 }

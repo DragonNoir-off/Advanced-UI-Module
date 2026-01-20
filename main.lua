@@ -29,22 +29,23 @@ function love.load()
     -- KEYBOARD CONFIGURATION
     love.keyboard.setKeyRepeat(true)
 
-    
-
     -- UI CONFIGURATION
     PreLoadUserInterface.MainScene()
 
-    image1 = UI.returnObjectFromPath("workspace/image3")
+    image1 = UI.returnObjectFromPath("workspace/fire_slash")
+
+    --UI.debug__showAll()
 end
 
 function love.update(dt)
     task.UpdateTask(dt)
-    image1:changeSize({image1.attribut.size.x + ( 100 * dt ),image1.attribut.size.y})
-    image1.attribut.rotation = image1.attribut.rotation + math.rad( dt * 20 )
+    --image1:changeSize({image1.attribut.size.x + ( 100 * dt ),image1.attribut.size.y})
+    --image1.attribut.rotation = image1.attribut.rotation + math.rad( dt * 60 )
+    --image2.attribut.rotation = image2.attribut.rotation + math.rad( dt * 60 )
 end
 
-function love.keypressed(key, _)
-    
+function love.keyreleased(key)
+    if key == "escape" then love.event.quit() end
 end
 
 function love.draw()
