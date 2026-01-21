@@ -331,9 +331,7 @@ function module:draw()
 
         local ratio_x = ( size_x / sprite_size_x )
         local ratio_y = ( size_y / sprite_size_y)
-
-        print(image, quad, pos_x, pos_y, rotation, ratio_x, ratio_y, anchor_offset_x, anchor_offset_y)
-
+        
         love.graphics.setColor(unpack(color))
         love.graphics.draw(image, quad, pos_x, pos_y, rotation, ratio_x, ratio_y, anchor_offset_x, anchor_offset_y)
         

@@ -5,9 +5,10 @@ local utf8 = require("utf8")
 local UI = require("src.Modules.UI")
 local Assets = require("src.Loader.AssetsLoader")
 local task = require("src.Modules.Task")
+local Tween = require("src.Modules.Tween")
 
 --[[ DATA ]]
-local PreLoadUserInterface = require("src.UI_DATA.PreLoadUserInterface")
+local PreLoadUserInterface = require("src.Data.PreLoadUserInterface")
 
 --[[ CONSTANT ]]
 local WINDOW_WIDTH = 960
@@ -33,12 +34,38 @@ function love.load()
     PreLoadUserInterface.MainScene()
 
     image1 = UI.returnObjectFromPath("workspace/fire_slash")
+    image2 = UI.returnObjectFromPath("workspace/fire_tornado")
 
     --UI.debug__showAll()
+    local tween1 = Tween.create({
+        start_data = 1,
+        end_data = (#image1.attribut.quad),
+        duration = 0.8,
+        repeat_amount = -1,
+        delay = 1,
+        update_function = function(value)
+            image1.attribut.sprite_quad_id = math.floor(value)
+        end
+    }):play()
+
+    local tween2 = Tween.create({
+        start_data = 1,
+        end_data = (#image2.attribut.quad),
+        duration = 0.2,
+        delay = 0.2/(#image2.attribut.quad),
+        repeat_amount = -1,
+        update_function = function(value)
+            image2.attribut.sprite_quad_id = math.floor(value)
+        end
+    }):play()
 end
 
 function love.update(dt)
+    -- Module render update
     task.UpdateTask(dt)
+    Tween.UpdateTween(dt)
+
+    -- [[ TEST DIVERS ]]
     --image1:changeSize({image1.attribut.size.x + ( 100 * dt ),image1.attribut.size.y})
     --image1.attribut.rotation = image1.attribut.rotation + math.rad( dt * 60 )
     --image2.attribut.rotation = image2.attribut.rotation + math.rad( dt * 60 )

@@ -12,12 +12,43 @@ return {
                 image = Assets.Get("Fire Effect and Bullet 16x16.png"),
                 size = {64,64},
                 sprite_size = {16,16},
-                sprite_quad_id = 1,
+                sprite_quad_id = 1, -- optinal
                 quad = {
-                    love.graphics.newQuad(384,33,16,16,576,208),
-                    love.graphics.newQuad(400,33,16,16,576,208),
-                    love.graphics.newQuad(416,33,16,16,576,208),
-                    love.graphics.newQuad(432,33,16,16,576,208)
+                    love.graphics.newQuad(464,32,16,16,576,208),
+                    love.graphics.newQuad(480,48,16,16,576,208),
+                    love.graphics.newQuad(496,48,16,16,576,208),
+                    love.graphics.newQuad(480,0,16,16,576,208),
+                    love.graphics.newQuad(480+(16*1),0,16,16,576,208),
+                    love.graphics.newQuad(480+(16*2),0,16,16,576,208),
+                    love.graphics.newQuad(480+(16*3),0,16,16,576,208),
+                    love.graphics.newQuad(480+(16*4),0,16,16,576,208),
+                    love.graphics.newQuad(480+(16*5),0,16,16,576,208),
+                    love.graphics.newQuad(480+(16*1),16,16,16,576,208),
+                    love.graphics.newQuad(480+(16*2),16,16,16,576,208),
+                    love.graphics.newQuad(480+(16*3),16,16,16,576,208),
+                    love.graphics.newQuad(480+(16*4),16,16,16,576,208),
+                    love.graphics.newQuad(480+(16*5),16,16,16,576,208),
+                    love.graphics.newQuad(544,48,16,16,576,208),
+                    love.graphics.newQuad(544+16,48,16,16,576,208),
+                    love.graphics.newQuad(464,32,16,16,576,208),
+                }
+            }
+        })
+
+        local fire_tornado = UI.new({
+            name = "fire_tornado",
+            ui_type = "sprite-sheet",
+            position = {80,10},
+            attribut = {
+                image = Assets.Get("Fire Effect and Bullet 16x16.png"),
+                size = {256,256},
+                sprite_size = {16,16},
+                sprite_quad_id = 1, -- optional
+                quad = {
+                    love.graphics.newQuad(304,0,16,16,576,208),
+                    love.graphics.newQuad(304+16,0,16,16,576,208),
+                    love.graphics.newQuad(304+32,0,16,16,576,208),
+                    love.graphics.newQuad(304+48,0,16,16,576,208),
                 }
             }
         })
