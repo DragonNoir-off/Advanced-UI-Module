@@ -24,7 +24,8 @@ local ColorTable = {
     white = module.new4(1,1,1,1),
     blue = module.new4(0,0,1,1),
     green = module.new4(0,1,0,1),
-    red = module.new4(1,0,0,1)
+    red = module.new4(1,0,0,1),
+
 }
 
 function module.fromPalette(color_name)

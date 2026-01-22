@@ -54,8 +54,8 @@ function module.new(data)
     -- set the position of the element
     local position = {x=0,y=0}
     if data.position ~= nil then
-        if data.position[1] ~= nil then position.x = data.position[1] end
-        if data.position[2] ~= nil then position.y = data.position[2] end
+        if data.position[1] ~= nil then position.x = math.floor(data.position[1]) end
+        if data.position[2] ~= nil then position.y = math.floor(data.position[2]) end
     end -- modification can be added later but right now it does the work
     self.position = position
 
@@ -93,6 +93,8 @@ function module.new(data)
         attribut.rotation = return_default(data_attribut.rotation, 0)
         attribut.image = return_default(data_attribut.image, Assets.Get("lua_icon.png"))
 
+        attribut.image:setWrap("clamp", "clamp")
+
         self.pre_render_anchor_point = data.anchor_point
         self.anchor_point = self.CalculateAnchorPoint(data.anchor_point, attribut.image:getWidth(), attribut.image:getHeight())
 
@@ -113,7 +115,9 @@ function module.new(data)
         attribut.sprite_size = self.SetSize({x=0,y=0},data_attribut.sprite_size)
 
         self.pre_render_anchor_point = data.anchor_point
-        self.anchor_point = self.CalculateAnchorPoint(data.anchor_point, attribut.image:getWidth(), attribut.image:getHeight())
+        self.anchor_point = self.CalculateAnchorPoint(data.anchor_point, attribut.sprite_size.x, attribut.sprite_size.y)
+
+        attribut.image:setWrap("clamp", "clamp")
 
         attribut.sprite_quad_id = return_default(data_attribut.sprite_quad_id,1)
         attribut.quad = data_attribut.quad

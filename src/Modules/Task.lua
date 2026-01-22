@@ -8,7 +8,6 @@ function module.UpdateTask(delta_time)
         if status == "suspended" then
             task.delay = task.delay - delta_time
             if task.delay <= 0 then
-                print("resume")
                 coroutine.resume(task.func)
             end
         elseif status == "dead" then

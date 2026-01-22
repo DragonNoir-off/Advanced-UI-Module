@@ -67,9 +67,14 @@ function module:update()
     if self.reverse_status == false then
         new_value = Tween_Data[self.style](self.timer, self.start_data, self.end_data, self.duration)
     else
-        new_value = Tween_Data[self.style](self.duration - self.timer, self.start_data, self.end_data, self.duration)
+        new_value = Tween_Data[self.style]( ( self.duration - self.timer ), self.start_data, self.end_data, self.duration)
     end
-    new_value = Format.min_max(new_value, self.start_data, self.end_data)
+    if self.start_data <= self.end_data then
+        new_value = Format.min_max(new_value, self.start_data, self.end_data)
+    else
+        new_value = Format.min_max(new_value, self.end_data, self.start_data)
+    end
+    
     self.update_function(new_value)
 end
 
@@ -87,7 +92,7 @@ end
 
 function module:cancel(position)
     local function destroy(position)
-        table.remove(tween_table, i) -- remove tween from table
+        table.remove(tween_table, position) -- remove tween from table
         self = nil -- clear the tween instance
     end
 
@@ -105,14 +110,14 @@ end
 
 function module:replay()
     self.timer = 0
-    self.tween_status = "inactive"
+    self.tween_status = "pause"
+    self.previous_tween_status = "inactive"
     self.repeated_amount = 0
     self.reverse_status = false
+    self:play()
 end
 
 function module:can_play()
-    print( self.repeated_amount < self.repeat_amount )
-    print( self.repeat_amount == -1 )
     return ( self.repeated_amount < self.repeat_amount ) or ( self.repeat_amount == -1 )
 end
 
@@ -123,20 +128,18 @@ function module.UpdateTween(dt)
 
         if tween.tween_status == "inactive" then
             if not tween:can_play() then
-                print("destroy")
-                tween:cancel(i) -- destroy the tween
+                if tween.delete_after_complet then
+                    tween:cancel(i) -- destroy the tween
+                else
+                    tween:pause()
+                end
             else
-                print("inactive")
                 if tween.reverse == true then tween.reverse_status = ( tween.repeated_amount % 2 ) ~= 0 end
-                print(tween.timer, tween.delay, tween.reverse_delay)
                 if ( tween.reverse_status == false and tween.timer < tween.delay ) or ( tween.reverse_status == true and tween.timer < tween.reverse_delay ) then
                     -- need to wait
                     tween.timer = tween.timer + dt
-                    print("increment", tween.timer)
                 else
                     -- will play tween
-
-                    print("play")
                     tween.timer = 0
                     tween.tween_status = "playing"
                     tween:update()
@@ -145,11 +148,9 @@ function module.UpdateTween(dt)
         elseif tween.tween_status == "playing" then
             if ( tween.timer < tween.duration ) then
                 -- still playing
-                print("incr play")
                 tween.timer = tween.timer + dt
                 tween:update()
             else
-                print("end play")
                 -- stop the tween
                 tween.tween_status = "inactive"
                 tween.repeated_amount = tween.repeated_amount + 1

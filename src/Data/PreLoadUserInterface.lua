@@ -4,13 +4,32 @@ local Assets = require("src.Loader.AssetsLoader")
 
 return {
     MainScene = function()
+
+        --[[
+        local scypth = UI.new({
+            name = "weapon",
+            ui_type = "sprite-sheet",
+            position = {200,200},
+            anchor_point = {x=0,y=1},
+            attribut = {
+                image = Assets.Get("Weapon_1.png"),
+                size = {90,90},
+                sprite_size = {48,48},
+                sprite_quad_id = 1,
+                quad = {
+                    love.graphics.newQuad(0,0,48,48,1152,480),
+                }
+            }
+        })]]
+
+        --[[
         local fire_slash = UI.new({
             name = "fire_slash",
             ui_type = "sprite-sheet",
-            position = {10,10},
+            position = {200,200},
             attribut = {
-                image = Assets.Get("Fire Effect and Bullet 16x16.png"),
-                size = {64,64},
+                image = Assets.Get("Water Effect and Bullet 16x16.png"),
+                size = {128,128},
                 sprite_size = {16,16},
                 sprite_quad_id = 1, -- optinal
                 quad = {
@@ -34,24 +53,19 @@ return {
                 }
             }
         })
+        ]]
 
-        local fire_tornado = UI.new({
-            name = "fire_tornado",
-            ui_type = "sprite-sheet",
-            position = {80,10},
+        local carrot = UI.new({
+            name = "carrot",
+            ui_type = "image",
+            position = {100,0},
             attribut = {
-                image = Assets.Get("Fire Effect and Bullet 16x16.png"),
-                size = {256,256},
-                sprite_size = {16,16},
-                sprite_quad_id = 1, -- optional
-                quad = {
-                    love.graphics.newQuad(304,0,16,16,576,208),
-                    love.graphics.newQuad(304+16,0,16,16,576,208),
-                    love.graphics.newQuad(304+32,0,16,16,576,208),
-                    love.graphics.newQuad(304+48,0,16,16,576,208),
-                }
+                image = Assets.Get("fc441.png"),
+                size = {64,64},
+                color = Color.fromPalette("white"),
             }
         })
+
         --[[
         local rectangle_1 = UI.new({
             name = "rectangle_1",
